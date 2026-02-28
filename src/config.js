@@ -49,7 +49,7 @@ const CONFIG = {
 
   shed: {
     x: 20,
-    y: 60,
+    y: 10,
     width: 150,
     height: 80,
     message: "Shed: store or retrieve tools?"
@@ -101,64 +101,11 @@ const CONFIG = {
       color: "#c8a96e",
       shadowColor: "#8a6d3e",
       yStart: 18,
-      yEnd: 300
+      yEnd: 400
     },
 
     // Patio + house edge (bottom of canvas)
     patio: {
       // Central patio slab
       slabX: 220,
-      slabY: 300,
-      slabWidth: 160,
-      slabHeight: 44,
-      slabColor: "#a89070",
-      slabBorderColor: "#7a6548",
-      tileLineColor: "#9a7d5a",
-
-      // House wall — full width continuous line
-      wallY: 340,
-      wallHeight: 12,
-      wallColor: "#c8b090",
-      wallBorderColor: "#8a6d48",
-
-      // Roof style: "shingle" or "gable"
-      roofStyle: "shingle",
-
-      // Where roof starts (just below wall)
-      roofY: 352,
-
-      // Hipped roof colours
-      roofColor: "#c0522a",       // main/near slope
-      roofShadowColor: "#8a3318", // darkest (left slope)
-      roofMidColor: "#a84422",    // mid-dark (right slope)
-      roofHighlight: "#d46940",   // lightest (far/top slope)
-      tileWidth: 40,
-      tileHeight: 14,
-      tileOverlap: 4,
-
-      // Gable (triangle roof silhouette)
-      gableColor: "#c0522a",
-      gableShadowColor: "#8a3318",
-      gableRidgeColor: "#d46940"
-    },
-
-    // Player cannot walk below this Y (patio/roof boundary)
-    blockedBelowY: 295
-
-  },
-
-  assets: {
-    player:         "assets/player/Gatito_sprite.png",
-    playerCan:      "assets/player/Gatito_sprite_Can.png",
-    playerShovel:   "assets/player/Gatito_sprite_shovel.png",
-    wateringCan:    "assets/items/watering_can.png",
-    shovel:         "assets/items/shovel.png",
-    table:          "assets/environment/table.png",
-    tableSeedless:  "assets/environment/table_seedless.png",
-    shed:           "assets/environment/shed.png",
-    seedTomato:     "assets/items/seeds/seed_tomato.png",
-    seedSunflower:  "assets/items/seeds/seed_sunflower.png",
-    seedCarrot:     "assets/items/seeds/seed_carrot.png"
-  }
-
-};
+   

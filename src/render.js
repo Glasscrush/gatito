@@ -173,27 +173,37 @@ function drawPatio(ctx) {
   const W = CONFIG.canvas.width;
   const H = CONFIG.canvas.height;
 
-  // 1. Draw hipped roof (behind everything)
+  // Draw order (back to front):
+  // 1. Roof (fills below wall)
+  // 2. Wall (thin full-width line)
+  // 3. Patio (sits above wall, protrudes into garden)
+
+  // 1. Roof
   drawHippedRoof(ctx, p, W, H);
 
-  // 2. House wall — full width continuous line across entire canvas
+  // 2. Wall — spans only the roof/house width (inside the grass strips)
+  const fenceW     = CONFIG.environment.sideFence.postWidth;
+  const grassStrip = 12;
+  const wallLeft   = fenceW + grassStrip;
+  const wallRight  = W - fenceW - grassStrip;
+  const wallWidth  = wallRight - wallLeft;
   ctx.fillStyle = p.wallColor;
-  ctx.fillRect(0, p.wallY, W, p.wallHeight);
+  ctx.fillRect(wallLeft, p.wallY, wallWidth, p.wallHeight);
   ctx.fillStyle = p.wallBorderColor;
-  ctx.fillRect(0, p.wallY, W, 2);
+  ctx.fillRect(wallLeft, p.wallY, wallWidth, 2);
   ctx.fillStyle = p.wallBorderColor;
-  ctx.fillRect(0, p.wallY + p.wallHeight - 2, W, 2);
+  ctx.fillRect(wallLeft, p.wallY + p.wallHeight - 2, wallWidth, 2);
 
-  // 3. Patio slab — top edge sits exactly at wallY so it's flush/connected
-  const patioTop = p.wallY;
-  const patioH   = H - patioTop;
+  // 3. Patio — bottom edge sits at wallY (top of wall), not overlapping it
+  const patioBot = p.wallY;          // patio bottom touches TOP of wall
+  const patioTop = patioBot - p.slabHeight;
   ctx.fillStyle = p.slabColor;
-  ctx.fillRect(p.slabX, patioTop, p.slabWidth, patioH);
+  ctx.fillRect(p.slabX, patioTop, p.slabWidth, p.slabHeight);
 
   // Patio tile lines (horizontal)
   ctx.strokeStyle = p.tileLineColor;
   ctx.lineWidth = 1;
-  for (let ty = patioTop + 14; ty < H; ty += 14) {
+  for (let ty = patioTop + 14; ty < patioBot; ty += 14) {
     ctx.beginPath();
     ctx.moveTo(p.slabX, ty);
     ctx.lineTo(p.slabX + p.slabWidth, ty);
@@ -203,22 +213,17 @@ function drawPatio(ctx) {
   for (let tx = p.slabX + 20; tx < p.slabX + p.slabWidth; tx += 20) {
     ctx.beginPath();
     ctx.moveTo(tx, patioTop);
-    ctx.lineTo(tx, H);
+    ctx.lineTo(tx, patioBot);
     ctx.stroke();
   }
 
-  // Patio left/right borders
+  // Patio border
   ctx.strokeStyle = p.slabBorderColor;
   ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(p.slabX, patioTop);
-  ctx.lineTo(p.slabX, H);
-  ctx.moveTo(p.slabX + p.slabWidth, patioTop);
-  ctx.lineTo(p.slabX + p.slabWidth, H);
-  ctx.stroke();
+  ctx.strokeRect(p.slabX, patioTop, p.slabWidth, p.slabHeight);
 
-  // Shadow at top of patio where it meets the wall
-  ctx.fillStyle = "rgba(0,0,0,0.12)";
+  // Shadow at top of patio
+  ctx.fillStyle = "rgba(0,0,0,0.14)";
   ctx.fillRect(p.slabX, patioTop, p.slabWidth, 4);
 }
 
@@ -227,41 +232,50 @@ function drawPatio(ctx) {
  * Four slopes meet at a flat centre ridge rectangle.
  *************************/
 function drawHippedRoof(ctx, p, W, H) {
+  const fenceW     = CONFIG.environment.sideFence.postWidth; // 8px
+  const grassStrip = 12;   // grass visible between fence and roof edge
+  const roofLeft   = fenceW + grassStrip;   // roof starts at 20px from left
+  const roofRight  = W - fenceW - grassStrip; // roof ends at 20px from right
   const roofTop    = p.roofY;
   const roofBot    = H;
   const slopeDepth = 28;
   const ridgeInset = 60;
 
+  // Draw grass strips either side of roof (between fence and roof edge)
+  ctx.fillStyle = CONFIG.environment.grassColor;
+  ctx.fillRect(fenceW, roofTop, grassStrip, roofBot - roofTop); // left strip
+  ctx.fillRect(roofRight, roofTop, grassStrip, roofBot - roofTop); // right strip
+
   const ridgeTop   = roofTop + slopeDepth;
   const ridgeBot   = roofBot - slopeDepth;
-  const ridgeLeft  = ridgeInset;
-  const ridgeRight = W - ridgeInset;
+  const ridgeLeft  = roofLeft  + ridgeInset;
+  const ridgeRight = roofRight - ridgeInset;
 
   // Far slope (top — lightest)
   ctx.fillStyle = p.roofHighlight;
   ctx.beginPath();
-  ctx.moveTo(0, roofTop); ctx.lineTo(W, roofTop);
+  ctx.moveTo(roofLeft, roofTop); ctx.lineTo(roofRight, roofTop);
   ctx.lineTo(ridgeRight, ridgeTop); ctx.lineTo(ridgeLeft, ridgeTop);
   ctx.closePath(); ctx.fill();
 
   // Near slope (bottom — medium)
   ctx.fillStyle = p.roofColor;
   ctx.beginPath();
-  ctx.moveTo(0, roofBot); ctx.lineTo(W, roofBot);
+  ctx.moveTo(roofLeft, roofBot); ctx.lineTo(roofRight, roofBot);
   ctx.lineTo(ridgeRight, ridgeBot); ctx.lineTo(ridgeLeft, ridgeBot);
   ctx.closePath(); ctx.fill();
 
   // Left slope (darkest)
   ctx.fillStyle = p.roofShadowColor;
   ctx.beginPath();
-  ctx.moveTo(0, roofTop); ctx.lineTo(0, roofBot);
+  ctx.moveTo(roofLeft, roofTop); ctx.lineTo(roofLeft, roofBot);
   ctx.lineTo(ridgeLeft, ridgeBot); ctx.lineTo(ridgeLeft, ridgeTop);
   ctx.closePath(); ctx.fill();
 
   // Right slope (mid-dark)
   ctx.fillStyle = p.roofMidColor;
   ctx.beginPath();
-  ctx.moveTo(W, roofTop); ctx.lineTo(W, roofBot);
+  ctx.moveTo(roofRight, roofTop); ctx.lineTo(roofRight, roofBot);
   ctx.lineTo(ridgeRight, ridgeBot); ctx.lineTo(ridgeRight, ridgeTop);
   ctx.closePath(); ctx.fill();
 
@@ -273,20 +287,20 @@ function drawHippedRoof(ctx, p, W, H) {
   ctx.strokeStyle = "rgba(0,0,0,0.12)";
   ctx.lineWidth = 1;
   for (let i = 1; i < 4; i++) {
-    const y = ridgeBot + ((roofBot - ridgeBot) * i / 4);
+    const y  = ridgeBot + ((roofBot - ridgeBot) * i / 4);
     const p2 = i / 4;
     ctx.beginPath();
-    ctx.moveTo(ridgeLeft * (1 - p2), y);
-    ctx.lineTo(W - ridgeLeft * (1 - p2), y);
+    ctx.moveTo(roofLeft  + ridgeInset * (1 - p2), y);
+    ctx.lineTo(roofRight - ridgeInset * (1 - p2), y);
     ctx.stroke();
   }
   // Tile lines on far slope
   for (let i = 1; i < 4; i++) {
-    const y = roofTop + ((ridgeTop - roofTop) * i / 4);
+    const y  = roofTop + ((ridgeTop - roofTop) * i / 4);
     const p2 = i / 4;
     ctx.beginPath();
-    ctx.moveTo(ridgeLeft * p2, y);
-    ctx.lineTo(W - ridgeLeft * p2, y);
+    ctx.moveTo(roofLeft  + ridgeInset * p2, y);
+    ctx.lineTo(roofRight - ridgeInset * p2, y);
     ctx.stroke();
   }
   // Tile lines on ridge (vertical)
@@ -300,12 +314,12 @@ function drawHippedRoof(ctx, p, W, H) {
   ctx.strokeStyle = p.roofShadowColor;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(ridgeLeft, ridgeTop); ctx.lineTo(ridgeRight, ridgeTop);
-  ctx.moveTo(ridgeLeft, ridgeBot); ctx.lineTo(ridgeRight, ridgeBot);
-  ctx.moveTo(0, roofTop); ctx.lineTo(ridgeLeft, ridgeTop);
-  ctx.moveTo(0, roofBot); ctx.lineTo(ridgeLeft, ridgeBot);
-  ctx.moveTo(W, roofTop); ctx.lineTo(ridgeRight, ridgeTop);
-  ctx.moveTo(W, roofBot); ctx.lineTo(ridgeRight, ridgeBot);
+  ctx.moveTo(ridgeLeft,  ridgeTop); ctx.lineTo(ridgeRight, ridgeTop);
+  ctx.moveTo(ridgeLeft,  ridgeBot); ctx.lineTo(ridgeRight, ridgeBot);
+  ctx.moveTo(roofLeft,  roofTop);  ctx.lineTo(ridgeLeft,  ridgeTop);
+  ctx.moveTo(roofLeft,  roofBot);  ctx.lineTo(ridgeLeft,  ridgeBot);
+  ctx.moveTo(roofRight, roofTop);  ctx.lineTo(ridgeRight, ridgeTop);
+  ctx.moveTo(roofRight, roofBot);  ctx.lineTo(ridgeRight, ridgeBot);
   ctx.stroke();
 }
 

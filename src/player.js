@@ -48,15 +48,4 @@ function updatePlayer() {
   }
 }
 
-/**
- * Update the player sprite to match what they're carrying.
- */
-function refreshPlayerSprite() {
-  if (inventory.wateringCan) {
-    player.image = images.playerCan;
-  } else if (inventory.shovel) {
-    player.image = images.playerShovel;
-  } else {
-    player.image = images.player;
-  }
-}
+/*
