@@ -32,6 +32,13 @@ function updatePlayer() {
       height: player.height
     };
 
+    // Block player from walking into patio/roof zone
+    const blockedY = CONFIG.environment.blockedBelowY;
+    if (nextPos.y + nextPos.height > blockedY) {
+      nextPos.y = player.y; // cancel vertical movement only
+      player.targetY = blockedY - player.height; // clamp target
+    }
+
     // Allow walking into shed only when targeting it for interaction
     const allowShedCollision = pendingPickup && pendingPickup.type === 'shed';
     if (!isColliding(nextPos, shed) || allowShedCollision) {

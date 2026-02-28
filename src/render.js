@@ -163,34 +163,37 @@ function drawSideFenceStrip(ctx, x, f) {
 /*************************
  * DRAW PATIO + HOUSE EDGE + ROOF (bottom of canvas)
  *************************/
+/*************************
+ * DRAW PATIO + HOUSE EDGE + HIPPED ROOF (bottom of canvas)
+ * Hipped roof viewed from above: slopes in from all 4 sides to a flat ridge.
+ * Patio connects flush to the wall.
+ *************************/
 function drawPatio(ctx) {
   const p = CONFIG.environment.patio;
   const W = CONFIG.canvas.width;
   const H = CONFIG.canvas.height;
 
-  // Roof tiles (fills from roofY to bottom of canvas)
-  drawRoofTiles(ctx, p, W, H);
+  // 1. Draw hipped roof (behind everything)
+  drawHippedRoof(ctx, p, W, H);
 
-  // House wall edge — left section
+  // 2. House wall — full width continuous line across entire canvas
   ctx.fillStyle = p.wallColor;
-  ctx.fillRect(p.wallLeftX, p.wallY, p.slabX - p.wallLeftX, p.wallHeight);
+  ctx.fillRect(0, p.wallY, W, p.wallHeight);
   ctx.fillStyle = p.wallBorderColor;
-  ctx.fillRect(p.wallLeftX, p.wallY, p.slabX - p.wallLeftX, 2);
-
-  // House wall edge — right section
-  ctx.fillStyle = p.wallColor;
-  ctx.fillRect(p.slabX + p.slabWidth, p.wallY, p.wallRightX - (p.slabX + p.slabWidth), p.wallHeight);
+  ctx.fillRect(0, p.wallY, W, 2);
   ctx.fillStyle = p.wallBorderColor;
-  ctx.fillRect(p.slabX + p.slabWidth, p.wallY, p.wallRightX - (p.slabX + p.slabWidth), 2);
+  ctx.fillRect(0, p.wallY + p.wallHeight - 2, W, 2);
 
-  // Patio slab base
+  // 3. Patio slab — top edge sits exactly at wallY so it's flush/connected
+  const patioTop = p.wallY;
+  const patioH   = H - patioTop;
   ctx.fillStyle = p.slabColor;
-  ctx.fillRect(p.slabX, p.slabY, p.slabWidth, p.slabHeight);
+  ctx.fillRect(p.slabX, patioTop, p.slabWidth, patioH);
 
   // Patio tile lines (horizontal)
   ctx.strokeStyle = p.tileLineColor;
   ctx.lineWidth = 1;
-  for (let ty = p.slabY + 13; ty < p.slabY + p.slabHeight; ty += 13) {
+  for (let ty = patioTop + 14; ty < H; ty += 14) {
     ctx.beginPath();
     ctx.moveTo(p.slabX, ty);
     ctx.lineTo(p.slabX + p.slabWidth, ty);
@@ -199,56 +202,113 @@ function drawPatio(ctx) {
   // Patio tile lines (vertical)
   for (let tx = p.slabX + 20; tx < p.slabX + p.slabWidth; tx += 20) {
     ctx.beginPath();
-    ctx.moveTo(tx, p.slabY);
-    ctx.lineTo(tx, p.slabY + p.slabHeight);
+    ctx.moveTo(tx, patioTop);
+    ctx.lineTo(tx, H);
     ctx.stroke();
   }
 
-  // Patio border
+  // Patio left/right borders
   ctx.strokeStyle = p.slabBorderColor;
   ctx.lineWidth = 2;
-  ctx.strokeRect(p.slabX, p.slabY, p.slabWidth, p.slabHeight);
+  ctx.beginPath();
+  ctx.moveTo(p.slabX, patioTop);
+  ctx.lineTo(p.slabX, H);
+  ctx.moveTo(p.slabX + p.slabWidth, patioTop);
+  ctx.lineTo(p.slabX + p.slabWidth, H);
+  ctx.stroke();
 
-  // Patio step shadow
+  // Shadow at top of patio where it meets the wall
   ctx.fillStyle = "rgba(0,0,0,0.12)";
-  ctx.fillRect(p.slabX, p.slabY, p.slabWidth, 4);
+  ctx.fillRect(p.slabX, patioTop, p.slabWidth, 4);
 }
 
 /*************************
- * DRAW ROOF TILES (terracotta overlapping shingles)
+ * HIPPED ROOF — viewed from above
+ * Four slopes meet at a flat centre ridge rectangle.
  *************************/
-function drawRoofTiles(ctx, p, W, H) {
-  const tW = p.tileWidth;
-  const tH = p.tileHeight;
-  const roofY = p.roofY;
-  const rows = Math.ceil((H - roofY) / (tH - p.tileOverlap)) + 1;
+function drawHippedRoof(ctx, p, W, H) {
+  const roofTop    = p.roofY;
+  const roofBot    = H;
+  const slopeDepth = 28;
+  const ridgeInset = 60;
 
-  for (let row = 0; row < rows; row++) {
-    const rowY = roofY + row * (tH - p.tileOverlap);
-    // Offset every other row by half a tile width for staggered look
-    const offsetX = (row % 2 === 0) ? 0 : tW / 2;
+  const ridgeTop   = roofTop + slopeDepth;
+  const ridgeBot   = roofBot - slopeDepth;
+  const ridgeLeft  = ridgeInset;
+  const ridgeRight = W - ridgeInset;
 
-    for (let tx = -tW + offsetX; tx < W + tW; tx += tW) {
-      // Tile base
-      ctx.fillStyle = p.roofColor;
-      ctx.beginPath();
-      ctx.rect(tx, rowY, tW - 2, tH);
-      ctx.fill();
+  // Far slope (top — lightest)
+  ctx.fillStyle = p.roofHighlight;
+  ctx.beginPath();
+  ctx.moveTo(0, roofTop); ctx.lineTo(W, roofTop);
+  ctx.lineTo(ridgeRight, ridgeTop); ctx.lineTo(ridgeLeft, ridgeTop);
+  ctx.closePath(); ctx.fill();
 
-      // Highlight on top edge of tile
-      ctx.fillStyle = p.roofHighlight;
-      ctx.fillRect(tx, rowY, tW - 2, 3);
+  // Near slope (bottom — medium)
+  ctx.fillStyle = p.roofColor;
+  ctx.beginPath();
+  ctx.moveTo(0, roofBot); ctx.lineTo(W, roofBot);
+  ctx.lineTo(ridgeRight, ridgeBot); ctx.lineTo(ridgeLeft, ridgeBot);
+  ctx.closePath(); ctx.fill();
 
-      // Shadow on bottom edge of tile (overlap shadow)
-      ctx.fillStyle = p.roofShadowColor;
-      ctx.fillRect(tx, rowY + tH - 3, tW - 2, 3);
+  // Left slope (darkest)
+  ctx.fillStyle = p.roofShadowColor;
+  ctx.beginPath();
+  ctx.moveTo(0, roofTop); ctx.lineTo(0, roofBot);
+  ctx.lineTo(ridgeLeft, ridgeBot); ctx.lineTo(ridgeLeft, ridgeTop);
+  ctx.closePath(); ctx.fill();
 
-      // Subtle vertical groove between tiles
-      ctx.fillStyle = p.roofShadowColor;
-      ctx.fillRect(tx + tW - 2, rowY, 2, tH);
-    }
+  // Right slope (mid-dark)
+  ctx.fillStyle = p.roofMidColor;
+  ctx.beginPath();
+  ctx.moveTo(W, roofTop); ctx.lineTo(W, roofBot);
+  ctx.lineTo(ridgeRight, ridgeBot); ctx.lineTo(ridgeRight, ridgeTop);
+  ctx.closePath(); ctx.fill();
+
+  // Flat ridge centre
+  ctx.fillStyle = p.roofColor;
+  ctx.fillRect(ridgeLeft, ridgeTop, ridgeRight - ridgeLeft, ridgeBot - ridgeTop);
+
+  // Tile lines on near slope
+  ctx.strokeStyle = "rgba(0,0,0,0.12)";
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    const y = ridgeBot + ((roofBot - ridgeBot) * i / 4);
+    const p2 = i / 4;
+    ctx.beginPath();
+    ctx.moveTo(ridgeLeft * (1 - p2), y);
+    ctx.lineTo(W - ridgeLeft * (1 - p2), y);
+    ctx.stroke();
   }
+  // Tile lines on far slope
+  for (let i = 1; i < 4; i++) {
+    const y = roofTop + ((ridgeTop - roofTop) * i / 4);
+    const p2 = i / 4;
+    ctx.beginPath();
+    ctx.moveTo(ridgeLeft * p2, y);
+    ctx.lineTo(W - ridgeLeft * p2, y);
+    ctx.stroke();
+  }
+  // Tile lines on ridge (vertical)
+  for (let tx = ridgeLeft + 20; tx < ridgeRight; tx += 20) {
+    ctx.beginPath();
+    ctx.moveTo(tx, ridgeTop); ctx.lineTo(tx, ridgeBot);
+    ctx.stroke();
+  }
+
+  // Hip edge lines
+  ctx.strokeStyle = p.roofShadowColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(ridgeLeft, ridgeTop); ctx.lineTo(ridgeRight, ridgeTop);
+  ctx.moveTo(ridgeLeft, ridgeBot); ctx.lineTo(ridgeRight, ridgeBot);
+  ctx.moveTo(0, roofTop); ctx.lineTo(ridgeLeft, ridgeTop);
+  ctx.moveTo(0, roofBot); ctx.lineTo(ridgeLeft, ridgeBot);
+  ctx.moveTo(W, roofTop); ctx.lineTo(ridgeRight, ridgeTop);
+  ctx.moveTo(W, roofBot); ctx.lineTo(ridgeRight, ridgeBot);
+  ctx.stroke();
 }
+
 
 function drawInventory(ctx, canvas) {
   const inv    = CONFIG.inventory;

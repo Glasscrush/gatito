@@ -127,10 +127,11 @@ const CONFIG = {
       // Where roof starts (just below wall)
       roofY: 352,
 
-      // Shingle (terracotta overlapping tiles)
-      roofColor: "#c0522a",
-      roofShadowColor: "#8a3318",
-      roofHighlight: "#d46940",
+      // Hipped roof colours
+      roofColor: "#c0522a",       // main/near slope
+      roofShadowColor: "#8a3318", // darkest (left slope)
+      roofMidColor: "#a84422",    // mid-dark (right slope)
+      roofHighlight: "#d46940",   // lightest (far/top slope)
       tileWidth: 40,
       tileHeight: 14,
       tileOverlap: 4,
