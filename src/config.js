@@ -69,18 +69,22 @@ const CONFIG = {
     { id: "carrot",    label: "Carrot" }
   ],
 
-  assets: {
-    player:         "assets/player/Gatito_sprite.png",
-    playerCan:      "assets/player/Gatito_sprite_Can.png",
-    playerShovel:   "assets/player/Gatito_sprite_shovel.png",
-    wateringCan:    "assets/items/watering_can.png",
-    shovel:         "assets/items/shovel.png",
-    table:          "assets/environment/table.png",
-    tableSeedless:  "assets/environment/table_seedless.png",
-    shed:           "assets/environment/shed.png",
-    seedTomato:     "assets/items/seeds/seed_tomato.png",
-    seedSunflower:  "assets/items/seeds/seed_sunflower.png",
-    seedCarrot:     "assets/items/seeds/seed_carrot.png"
-  }
+  // ─── ENVIRONMENT LAYOUT ───────────────────────────────────────────
 
-};
+  environment: {
+
+    // Grass area colour
+    grassColor: "#2d6e35",
+
+    // Back fence (top of canvas) - wooden picket
+    backFence: {
+      y: 30,               // y position of fence top
+      height: 22,          // fence height
+      postWidth: 8,        // width of each picket
+      postSpacing: 18,     // spacing between picket centres
+      color: "#c8a96e",    // warm wood colour
+      shadowColor: "#8a6d3e",
+      capColor: "#e0c48a"
+    },
+
+    // Gate (

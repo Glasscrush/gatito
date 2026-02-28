@@ -10,27 +10,14 @@ function draw() {
   const canvas = document.getElementById("gameCanvas");
   const ctx    = canvas.getContext("2d");
 
-  /**** BACKGROUND ****/
-  ctx.fillStyle = "#1f4d2b";
+  /**** BACKGROUND GRASS ****/
+  ctx.fillStyle = "#2d6e35";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  /**** DEBUG: COORDINATE CROSSHAIR (remove when done) ****/
-  if (showCoords) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth   = 1;
-    ctx.beginPath();
-    ctx.moveTo(hoverX, 0);   ctx.lineTo(hoverX, canvas.height);
-    ctx.moveTo(0, hoverY);   ctx.lineTo(canvas.width, hoverY);
-    ctx.stroke();
-
-    const text = `x:${hoverX} y:${hoverY}`;
-    ctx.font = '12px Arial';
-    const w = ctx.measureText(text).width + 8;
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(8, 8, w, 18);
-    ctx.fillStyle = 'white';
-    ctx.fillText(text, 12, 22);
-  }
+  /**** ENVIRONMENT ****/
+  drawPatio(ctx);
+  drawBackFence(ctx);
+  drawSideFences(ctx);
 
   /**** SHED ****/
   if (images.shed) ctx.drawImage(images.shed, shed.x, shed.y, shed.width, shed.height);
@@ -58,41 +45,51 @@ function draw() {
 
   /**** INVENTORY BAR ****/
   drawInventory(ctx, canvas);
-}
 
-function drawInventory(ctx, canvas) {
-  const inv    = CONFIG.inventory;
-  const invY   = canvas.height - inv.barHeight;
-  const startX = inv.barPadding + 10;
-
-  // Bar background
-  ctx.fillStyle = "rgba(0,0,0,0.4)";
-  ctx.fillRect(10, invY, 250, 40);
-
-  let offsetX = startX;
-
-  // Watering can icon
-  if (inventory.wateringCan && images.wateringCan) {
-    ctx.drawImage(images.wateringCan, offsetX, invY + 8, inv.iconSize, inv.iconSize);
-    offsetX += inv.iconSpacing;
-  }
-
-  // Shovel icon
-  if (inventory.shovel && images.shovel) {
-    ctx.drawImage(images.shovel, offsetX, invY + 8, inv.iconSize, inv.iconSize);
-    offsetX += inv.iconSpacing;
-  }
-
-  // Seed icons with count
-  ctx.fillStyle = "white";
-  ctx.font      = "14px Arial";
-  for (const seedId in inventory.seeds) {
-    const count = inventory.seeds[seedId];
-    if (count > 0) {
-      const sprite = getSeedSprite(seedId);
-      if (sprite) ctx.drawImage(sprite, offsetX, invY + 8, inv.iconSize, inv.iconSize);
-      ctx.fillText(count, offsetX + 20, invY + 20);
-      offsetX += inv.iconSpacing;
-    }
+  /**** DEBUG: COORDINATE CROSSHAIR (remove when done) ****/
+  if (showCoords) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(hoverX, 0);   ctx.lineTo(hoverX, canvas.height);
+    ctx.moveTo(0, hoverY);   ctx.lineTo(canvas.width, hoverY);
+    ctx.stroke();
+    const text = `x:${hoverX} y:${hoverY}`;
+    ctx.font = '12px Arial';
+    const w = ctx.measureText(text).width + 8;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(8, 8, w, 18);
+    ctx.fillStyle = 'white';
+    ctx.fillText(text, 12, 22);
   }
 }
+
+/*************************
+ * DRAW BACK FENCE (top of canvas, wooden picket with gate)
+ *************************/
+function drawBackFence(ctx) {
+  const f    = CONFIG.environment.backFence;
+  const g    = CONFIG.environment.gate;
+  const W    = CONFIG.canvas.width;
+  const cx   = W / 2;
+
+  // Gate bounds (centred)
+  const gateLeft  = cx - g.width / 2;
+  const gateRight = cx + g.width / 2;
+
+  // Gate opening (grass-coloured gap)
+  ctx.fillStyle = g.openColor;
+  ctx.fillRect(gateLeft, 0, g.width, f.y + f.height);
+
+  // Draw pickets left of gate and right of gate
+  drawPicketSection(ctx, 0,         gateLeft,  f, true);
+  drawPicketSection(ctx, gateRight, W,         f, true);
+
+  // Gate frame posts (chunky vertical posts either side of gap)
+  ctx.fillStyle = g.postColor;
+  ctx.fillRect(gateLeft - 6,  0, 6, f.y + f.height + 4);
+  ctx.fillRect(gateRight,     0, 6, f.y + f.height + 4);
+
+  // Gate bars (two horizontal rails across the gap)
+  ctx.fillStyle = g.color;
+  ctx.fil
