@@ -11,14 +11,14 @@ const CONFIG = {
   },
 
   player: {
-    startX: 100,
+    startX: 300,
     startY: 200,
     width: 60,
     height: 60,
     speed: 3
   },
 
-  item: {  // watering can (world object)
+  item: {
     x: 300,
     y: 200,
     width: 30,
@@ -26,7 +26,7 @@ const CONFIG = {
     message: "Oh look a watering can! Pick up?"
   },
 
-  shovel: {  // shovel (world object)
+  shovel: {
     x: 50,
     y: 200,
     width: 30,
@@ -49,18 +49,18 @@ const CONFIG = {
 
   shed: {
     x: 20,
-    y: 15,
+    y: 60,
     width: 150,
     height: 80,
     message: "Shed: store or retrieve tools?"
   },
 
   inventory: {
-    maxSeeds: 3,       // max of each seed type player can carry
-    barHeight: 50,     // height of inventory bar at bottom of canvas
-    barPadding: 10,    // left padding inside bar
-    iconSize: 30,      // size of each icon in inventory
-    iconSpacing: 32    // spacing between icons
+    maxSeeds: 3,
+    barHeight: 50,
+    barPadding: 10,
+    iconSize: 30,
+    iconSpacing: 32
   },
 
   seeds: [
@@ -73,16 +73,15 @@ const CONFIG = {
 
   environment: {
 
-    // Grass area colour
     grassColor: "#2d6e35",
 
     // Back fence (top of canvas) - wooden picket
     backFence: {
-      y: 18,               // y position of fence top
-      height: 14,          // fence height (shorter)
-      postWidth: 8,        // width of each picket
-      postSpacing: 18,     // spacing between picket centres
-      color: "#c8a96e",    // warm wood colour
+      y: 18,
+      height: 14,
+      postWidth: 8,
+      postSpacing: 18,
+      color: "#c8a96e",
       shadowColor: "#8a6d3e",
       capColor: "#e0c48a"
     },
@@ -92,7 +91,7 @@ const CONFIG = {
       width: 50,
       color: "#b8954e",
       postColor: "#7a5c2e",
-      openColor: "#1a5c24" // gap colour (looks like outside/beyond)
+      openColor: "#1a5c24"
     },
 
     // Side fences (left and right)
@@ -101,38 +100,50 @@ const CONFIG = {
       postSpacing: 20,
       color: "#c8a96e",
       shadowColor: "#8a6d3e",
-      yStart: 18,          // top (meets back fence)
-      yEnd: 310            // bottom (above patio)
+      yStart: 18,
+      yEnd: 300
     },
 
     // Patio + house edge (bottom of canvas)
     patio: {
       // Central patio slab
       slabX: 220,
-      slabY: 310,
+      slabY: 300,
       slabWidth: 160,
-      slabHeight: 40,
+      slabHeight: 44,
       slabColor: "#a89070",
       slabBorderColor: "#7a6548",
       tileLineColor: "#9a7d5a",
 
-      // House wall edge — partial lines either side of patio
-      wallY: 348,
-      wallHeight: 10,
+      // House wall — full width continuous line
+      wallY: 340,
+      wallHeight: 12,
       wallColor: "#c8b090",
       wallBorderColor: "#8a6d48",
-      wallLeftX: 8,
-      wallRightX: 592,
 
-      // Roof tiles (below wall, fills bottom of canvas)
-      roofY: 358,
+      // Roof style: "shingle" or "gable"
+      roofStyle: "shingle",
+
+      // Where roof starts (just below wall)
+      roofY: 352,
+
+      // Shingle (terracotta overlapping tiles)
       roofColor: "#c0522a",
       roofShadowColor: "#8a3318",
       roofHighlight: "#d46940",
       tileWidth: 40,
       tileHeight: 14,
-      tileOverlap: 4
-    }
+      tileOverlap: 4,
+
+      // Gable (triangle roof silhouette)
+      gableColor: "#c0522a",
+      gableShadowColor: "#8a3318",
+      gableRidgeColor: "#d46940"
+    },
+
+    // Player cannot walk below this Y (patio/roof boundary)
+    blockedBelowY: 295
+
   },
 
   assets: {
